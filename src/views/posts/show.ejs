@@ -11,7 +11,7 @@
     <main class="container">
         <h1><%= post.title %></h1>
         <a href="/topics/<%= post.topicId %>/posts/<%= post.id %>/edit" class="btn btn-warning">Edit</a>
-        <form action="/topics/<% post.topicId %>/posts/<% post.id %>/destory" method="post" style="display:initial">
+        <form action="/topics/<%= post.topicId %>/posts/<%= post.id %>/destroy" method="post" style="display:initial">
             <button type="submit" class="btn btn-warning">Delete</button>
         </form>
         <p><%= post.body %></p>
