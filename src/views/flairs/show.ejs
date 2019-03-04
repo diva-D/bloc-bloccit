@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <% include ../static/partials/head.ejs %>
+</head>
+
+<body>
+    <% include ../static/partials/navbar.ejs %>
+
+    <main class="container">
+        <h1>
+            <%= flair.name %>
+        </h1>
+        <a href="/topics/<%= flair.topicId %>/flairs/<%= flair.id %>/edit" class="btn btn-warning">Edit</a>
+        <form action="/topics/<%= flair.topicId %>/flairs/<%= flair.id %>/destroy" method="post" style="display:initial">
+            <button type="submit" class="btn btn-warning">Delete</button>
+        </form>
+        <p style="background-color: <%= flair.color %>">
+            Color: <%= flair.color %>
+        </p>
+    </main>
+
+    <% include ../static/partials/baseScripts.ejs %>
+
+</body>
+
+</html>

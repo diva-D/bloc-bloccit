@@ -18,6 +18,16 @@
 
         <p><%= topic.description %></p>
         <hr>
+        <h2>Flairs:</h2>
+        <ul class="list-group">
+            <% topic.flairs.forEach((flair) => { %>
+                <li class="list-group-item">
+                    <a href="/topics/<%= topic.id %>/flairs/<%= flair.id %>" style="background-color: <%= flair.color %>"> <%= flair.name %> </a>
+                </li>
+            <% }) %>
+        </ul>
+        <a href="/topics/<%= topic.id %>/flairs/new" class="btn btn-default">New Flair</a>
+        <hr>
 
         <h1>Posts</h1>
 
