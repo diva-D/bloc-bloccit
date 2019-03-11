@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <% include ../static/partials/head.ejs %>
+    </head>
+    <body>
+
+        <% include ../static/partials/navbar.ejs %>
+
+        <main class="container">
+
+            <% include ../static/partials/messages.ejs %>
+
+            <h1>Sign up</h1>
+
+            <form action="/users" method="POST">
+                <div class="form-group">
+                    <label for="email">email</label>
+                    <input type="email" name="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email">
+                    <small class="text-muted" id="emailHelp">email address must be a valid address</small>
+                </div>
+        
+                <div class="form-group">
+                    <label for="password">password</label>  
+                    <input type="password" name="password" aria-description="passwordHelp" placeholder="Enter password" class="form-control">
+                    <small class="text-muted" id="passwordHelp">password must match confirmation below</small>
+                </div>
+        
+                <div class="form-group">
+                    <label for="passwordConfirmation">Password Confirmation</label>
+                    <input type="password" class="form-control" name="passwordConfirmation" aria-description="passwordHelp" placeholder="Enter password confirmation">
+                </div>
+        
+                <button type="submit" class="btn btn-primary">Sign up</button>
+                
+            </form>
+        </main>
+
+    <% include ../static/partials/baseScripts.ejs %>
+
+    </body>
+</html>

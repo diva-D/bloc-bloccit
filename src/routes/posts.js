@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const postController = require("../controllers/postController");
-const validation = require("./validations");
+const validation = require("./validation");
 
 router.get("/topics/:topicId/posts/new", postController.new);
 router.post("/topics/:topicId/posts/create", validation.validatePosts, postController.create);
