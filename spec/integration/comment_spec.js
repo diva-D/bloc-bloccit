@@ -204,4 +204,86 @@ describe("routes : comments", () => {
 
     });
 
+    describe("signed in user but different member", () => {
+
+        beforeEach((done) => { // before each suite in this context
+            
+            request.get({ // mock authentication
+                    url: "http://localhost:3000/auth/fake",
+                    form: {
+                        role: "member", // mock authenticate as member user
+                        userId: (this.user.id + 1)
+                    }
+                },
+                (err, res, body) => {
+                    done();
+                }
+            );
+        });
+
+        it("should not delete the comment that doesn't match user ID", (done) => {
+            Comment.all()
+                .then((comments) => {
+                    const commentCountBeforeDelete = comments.length;
+
+                    expect(commentCountBeforeDelete).toBe(1);
+
+                    request.post(
+                        `${base}${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
+                        (err, res, body) => {
+                            expect(res.statusCode).toBe(401);
+                            Comment.all()
+                                .then((comments) => {
+                                    expect(err).toBeNull();
+                                    expect(comments.length).toBe(commentCountBeforeDelete);
+                                    done();
+                                });
+
+                        });
+                });
+
+        });
+    });
+
+    describe("ADMIN user", () => {
+
+        beforeEach((done) => { // before each suite in this context
+
+            request.get({ // mock authentication
+                    url: "http://localhost:3000/auth/fake",
+                    form: {
+                        role: "admin", // mock authenticate as member user
+                        userId: (this.user.id + 1)
+                    }
+                },
+                (err, res, body) => {
+                    done();
+                }
+            );
+        });
+
+        it("should delete the comment that doesn't match user ID", (done) => {
+            Comment.all()
+                .then((comments) => {
+                    const commentCountBeforeDelete = comments.length;
+
+                    expect(commentCountBeforeDelete).toBe(1);
+
+                    request.post(
+                        `${base}${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
+                        (err, res, body) => {
+                            expect(res.statusCode).toBe(302);
+                            Comment.all()
+                                .then((comments) => {
+                                    expect(err).toBeNull();
+                                    expect(comments.length).toBe(commentCountBeforeDelete - 1);
+                                    done();
+                                });
+
+                        });
+                });
+
+        });
+    });
+
 });
