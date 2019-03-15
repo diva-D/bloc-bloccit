@@ -8,9 +8,9 @@
             sent by <%= comment.User.email %> on <%= comment.createdAt %>
         </small>
 
-        <% if(currentUser && currentUser.id === commend.userId || currentUser.isAdmin()) { %>
+        <% if(currentUser && currentUser.id === comment.userId || currentUser.isAdmin()) { %>
             <form 
-                    action="/topics/<%= post.topicId %>/posts/<%= post.id %>/comments/<%= commend.id %>/destroy" 
+                    action="/topics/<%= post.topicId %>/posts/<%= post.id %>/comments/<%= comment.id %>/destroy" 
                     style="display:intial"
                     method="POST">
                 <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
