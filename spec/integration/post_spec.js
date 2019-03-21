@@ -49,6 +49,20 @@ describe("routes : posts", () => {
     // Guest users context
     describe("GUEST users performing CRUD actions for Post", () => {
 
+        beforeEach((done) => {
+            request.get({
+                    url: "http://localhost:3000/auth/fake",
+                    form: {
+                        userId: 0,
+                        role: "guest"
+                    }
+                },
+                (err, res, body) => {
+                    done();
+                }
+            );
+        });
+
         describe("GET /topics/:topicId/posts/new", () => {
             it("should not render a new post form", (done) => {
                 request.get(`${base}/${this.topic.id}/posts/new`, (err, res, body) => {
@@ -158,6 +172,7 @@ describe("routes : posts", () => {
             request.get({
                 url: "http://localhost:3000/auth/fake",
                 form: {
+                    userId: this.user.id,
                     role: "member"
                 }
             },
