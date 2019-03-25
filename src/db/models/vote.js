@@ -16,7 +16,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     }
-  }, {});
+  }, {
+    indexes: [
+      {
+        unique: true,
+        fields: ['postId', 'userId']
+      }
+    ]
+  });
   Vote.associate = function(models) {
     // associations can be defined here
     Vote.belongsTo(models.Post, {
