@@ -38,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "userId",
       as: "favorites"
     });
+
   };
 
   User.prototype.isAdmin = function() {
