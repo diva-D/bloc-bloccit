@@ -67,27 +67,29 @@ describe("routes : votes", () => {
 
         describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
             it("should not create a new vote", (done) => {
-                const options = {
-                    url: `${base}${this.topic.id}/posts/${this.post.id}/votes/upvote`
-                };
-                request.get(options,
-                    (err, res, body) => {
-                        Vote.findOne({
-                            where: {
-                                userId: this.user.id,
-                                postId: this.post.id
-                            }
-                        })
-                        .then((vote) => {
-                            expect(vote).toBeNull();
-                            done();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
-                    }
-                );
+                Vote.all()
+                .then((votes) => {
+                    const voteCountBeforeDelete = votes.length;
+
+                    expect(voteCountBeforeDelete).toBe(1);
+
+                    const options = {
+                        url: `${base}${this.topic.id}/posts/${this.post.id}/votes/upvote`
+                    };
+                    request.get(options,
+                        (err, res, body) => {
+                            Vote.all()
+                            .then((votes) => {
+                                expect(voteCountBeforeDelete).toBe(votes.length);
+                                done();
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                done();
+                            });
+                        }
+                    );
+                });
             });
         });
     });
@@ -193,12 +195,6 @@ describe("routes : votes", () => {
                     postId: this.post.id
                 })
                 .then((vote) => {
-                    Vote.create({
-                        value: 1,
-                        userId: this.user.id,
-                        postId: this.post.id
-                    })
-                    .then((vote) => {
                         // nothing as code should not run
                         done();
                     })
@@ -208,7 +204,6 @@ describe("routes : votes", () => {
                     });
                 });
             });
-        });
 
         describe("#Post.getPoints()", () => {
             
