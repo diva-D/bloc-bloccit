@@ -16,49 +16,51 @@ describe("routes : votes", () => {
         this.post;
         this.vote;
 
-        sequelize.sync({force: true}).then((res) => {
+        sequelize.sync({
+            force: true
+        }).then((res) => {
             User.create({
-                email: "starman@tesla.com",
-                password: "Trekkie4lyfe"
-            })
-            .then((res) => {
-                this.user = res;
-
-                Topic.create({
-                    title: "Expeditions to Alpha Centauri",
-                    description: "A compilation of reports from recent visits to the star system.",
-                    posts: [{
-                        title: "My first visit to Proxima Centauri b",
-                        body: "I saw some rocks.",
-                        userId: this.user.id
-                    }]
-                }, {
-                    include: {
-                        model: Post,
-                        as: "posts"
-                    }
+                    email: "starman@tesla.com",
+                    password: "Trekkie4lyfe"
                 })
                 .then((res) => {
-                    this.topic = res;
-                    this.post = this.topic.posts[0];
-                    done();
-                })
-                .catch((err) => {
-                    console.log(err);
-                    done();
+                    this.user = res;
+
+                    Topic.create({
+                            title: "Expeditions to Alpha Centauri",
+                            description: "A compilation of reports from recent visits to the star system.",
+                            posts: [{
+                                title: "My first visit to Proxima Centauri b",
+                                body: "I saw some rocks.",
+                                userId: this.user.id
+                            }]
+                        }, {
+                            include: {
+                                model: Post,
+                                as: "posts"
+                            }
+                        })
+                        .then((res) => {
+                            this.topic = res;
+                            this.post = this.topic.posts[0];
+                            done();
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            done();
+                        });
                 });
-            });
         });
     });
 
     describe("guest attempting to vote on a post", () => {
         beforeEach((done) => {
             request.get({
-                url: "http://localhost:3000/auth/fake",
-                form: {
-                    userId: 0
-                }
-            },
+                    url: "http://localhost:3000/auth/fake",
+                    form: {
+                        userId: 0
+                    }
+                },
                 (err, res, body) => {
                     done();
                 }
@@ -67,29 +69,27 @@ describe("routes : votes", () => {
 
         describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
             it("should not create a new vote", (done) => {
-                Vote.all()
-                .then((votes) => {
-                    const voteCountBeforeDelete = votes.length;
-
-                    expect(voteCountBeforeDelete).toBe(1);
-
-                    const options = {
-                        url: `${base}${this.topic.id}/posts/${this.post.id}/votes/upvote`
-                    };
-                    request.get(options,
-                        (err, res, body) => {
-                            Vote.all()
-                            .then((votes) => {
-                                expect(voteCountBeforeDelete).toBe(votes.length);
+                const options = {
+                    url: `${base}${this.topic.id}/posts/${this.post.id}/votes/upvote`
+                };
+                request.get(options,
+                    (err, res, body) => {
+                        Vote.findOne({
+                                where: {
+                                    userId: this.user.id,
+                                    postId: this.post.id
+                                }
+                            })
+                            .then((vote) => {
+                                expect(vote).toBeNull();
                                 done();
                             })
                             .catch((err) => {
                                 console.log(err);
                                 done();
                             });
-                        }
-                    );
-                });
+                    }
+                );
             });
         });
     });
@@ -97,12 +97,12 @@ describe("routes : votes", () => {
     describe("signed in user voting on a post", () => {
         beforeEach((done) => {
             request.get({
-                url: "http://localhost:3000/auth/fake",
-                form: {
-                    role: "member",
-                    userId: this.user.id
-                }
-            },
+                    url: "http://localhost:3000/auth/fake",
+                    form: {
+                        role: "member",
+                        userId: this.user.id
+                    }
+                },
                 (err, res, body) => {
                     done();
                 }
@@ -117,22 +117,22 @@ describe("routes : votes", () => {
                 request.get(options,
                     (err, res, body) => {
                         Vote.findOne({
-                            where: {
-                                userId: this.user.id,
-                                postId: this.post.id
-                            }
-                        })
-                        .then((vote) => {
-                            expect(vote).not.toBeNull();
-                            expect(vote.value).toBe(1);
-                            expect(vote.userId).toBe(this.user.id);
-                            expect(vote.postId).toBe(this.post.id);
-                            done();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
+                                where: {
+                                    userId: this.user.id,
+                                    postId: this.post.id
+                                }
+                            })
+                            .then((vote) => {
+                                expect(vote).not.toBeNull();
+                                expect(vote.value).toBe(1);
+                                expect(vote.userId).toBe(this.user.id);
+                                expect(vote.postId).toBe(this.post.id);
+                                done();
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                done();
+                            });
                     }
                 );
 
@@ -148,25 +148,24 @@ describe("routes : votes", () => {
                 request.get(options,
                     (err, res, body) => {
                         Vote.findOne({
-                            where: {
-                                userId: this.user.id,
-                                postId: this.post.id
-                            }
-                        })
-                        .then((vote) => {
-                            expect(vote).not.toBeNull();
-                            expect(vote.value).toBe(-1);
-                            expect(vote.userId).toBe(this.user.id);
-                            expect(vote.postId).toBe(this.post.id);
-                            done();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
+                                where: {
+                                    userId: this.user.id,
+                                    postId: this.post.id
+                                }
+                            })
+                            .then((vote) => {
+                                expect(vote).not.toBeNull();
+                                expect(vote.value).toBe(-1);
+                                expect(vote.userId).toBe(this.user.id);
+                                expect(vote.postId).toBe(this.post.id);
+                                done();
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                done();
+                            });
                     });
-                }
-            );
+            });
         });
 
 
@@ -174,58 +173,66 @@ describe("routes : votes", () => {
 
             it("should not create a vote with a value other than 1 or -1", (done) => {
                 Vote.create({
-                    value: 2,
-                    userId: this.user.id,
-                    postId: this.post.id
-                })
-                .then((vote) => {
-                    // nothing as code should not run
-                    done();
-                })
-                .catch((err) => {
-                    expect(err.message).toContain("Validation error: Validation isIn on value failed");
-                    done();
-                });
-            });
-
-            it("should not create more than one vote per user per post", (done) => {
-                Vote.create({
-                    value: 1,
-                    userId: this.user.id,
-                    postId: this.post.id
-                })
-                .then((vote) => {
+                        value: 2,
+                        userId: this.user.id,
+                        postId: this.post.id
+                    })
+                    .then((vote) => {
                         // nothing as code should not run
                         done();
                     })
                     .catch((err) => {
-                        expect(err.message).toContain("Validation error");
+                        expect(err.message).toContain("Validation error: Validation isIn on value failed");
                         done();
                     });
-                });
             });
 
+            it("should not create more than one vote per user per post", (done) => {
+                Vote.create({
+                        value: 1,
+                        userId: this.user.id,
+                        postId: this.post.id
+                    })
+                    .then((vote) => {
+                        Vote.create({
+                                value: 1,
+                                userId: this.user.id,
+                                postId: this.post.id
+                            })
+                            .then((vote) => {
+                                // nothing as code should not run
+                                done();
+                            })
+                            .catch((err) => {
+                                expect(err.message).toContain("Validation error");
+                                done();
+                            });
+                    });
+            });
+        });
+
         describe("#Post.getPoints()", () => {
-            
+
             it("should return the correct vote total for an upvote", (done) => {
                 const options = {
                     url: `${base}${this.topic.id}/posts/${this.post.id}/votes/upvote`
                 };
                 request.get(options,
-                        (err, res, body) => {
+                    (err, res, body) => {
                         Post.findById(this.post.id, {
-                            include: [
-                                {model: Vote, as: "votes"}
-                            ]
-                        })
-                        .then((post) => {
-                            expect(post.getPoints()).toBe(1);
-                            done();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
+                                include: [{
+                                    model: Vote,
+                                    as: "votes"
+                                }]
+                            })
+                            .then((post) => {
+                                expect(post.getPoints()).toBe(1);
+                                done();
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                done();
+                            });
                     }
                 );
             });
@@ -235,20 +242,21 @@ describe("routes : votes", () => {
                     url: `${base}${this.topic.id}/posts/${this.post.id}/votes/downvote`
                 };
                 request.get(options,
-                        (err, res, body) => {
+                    (err, res, body) => {
                         Post.findById(this.post.id, {
-                            include: [
-                                {model: Vote, as: "votes"}
-                            ]
-                        })
-                        .then((post) => {
-                            expect(post.getPoints()).toBe(-1);
-                            done();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
+                                include: [{
+                                    model: Vote,
+                                    as: "votes"
+                                }]
+                            })
+                            .then((post) => {
+                                expect(post.getPoints()).toBe(-1);
+                                done();
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                done();
+                            });
                     }
                 );
             });
@@ -262,23 +270,24 @@ describe("routes : votes", () => {
                 request.get(options,
                     (err, res, body) => {
                         Post.findById(this.post.id, {
-                            include: [
-                                {model: Vote, as: "votes"}
-                            ]
-                        })
-                        .then((post) => {
-                            expect(post.hasUpvoteFor(this.user.id)).toBe(true);
-                            done();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
+                                include: [{
+                                    model: Vote,
+                                    as: "votes"
+                                }]
+                            })
+                            .then((post) => {
+                                expect(post.hasUpvoteFor(this.user.id)).toBe(true);
+                                done();
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                done();
+                            });
                     }
                 );
             });
         });
-        
+
         describe("#Post.hasDownvoteFor()", () => {
             it("should return true if the user has downvoted a post", (done) => {
                 const options = {
@@ -287,18 +296,19 @@ describe("routes : votes", () => {
                 request.get(options,
                     (err, res, body) => {
                         Post.findById(this.post.id, {
-                            include: [
-                                {model: Vote, as: "votes"}
-                            ]
-                        })
-                        .then((post) => {
-                            expect(post.hasDownvoteFor(this.user.id)).toBe(true);
-                            done();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
+                                include: [{
+                                    model: Vote,
+                                    as: "votes"
+                                }]
+                            })
+                            .then((post) => {
+                                expect(post.hasDownvoteFor(this.user.id)).toBe(true);
+                                done();
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                done();
+                            });
                     }
                 );
             });
