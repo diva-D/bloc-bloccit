@@ -65,39 +65,48 @@ describe("Vote", () => {
 
     describe("#create()", () => {
         it("should create an upvote on a post for a user", (done) => {
-            Vote.create({
-                    value: 1,
-                    postId: this.post.id,
-                    userId: this.user.id
-                })
-                .then((vote) => {
-                    expect(vote.value).toBe(1);
-                    expect(vote.postId).toBe(this.post.id);
-                    expect(vote.userId).toBe(this.user.id);
-                    done();
-                })
-                .catch((err) => {
-                    console.log(err);
-                    done();
-                });
+            Vote.findOne({
+                where: {
+                    userId: this.user.id,
+                    postId: this.post.id
+                }
+            })
+            .then((vote) => {
+                expect(vote.value).toBe(1);
+                expect(vote.postId).toBe(this.post.id);
+                expect(vote.userId).toBe(this.user.id);
+                done();
+            })
+            .catch((err) => {
+                console.log(err);
+                done();
+            });
         });
 
         it("should create a downvote on a post for a user", (done) => {
-            Vote.create({
-                    value: -1,
-                    postId: this.post.id,
-                    userId: this.user.id
-                })
-                .then((vote) => {
-                    expect(vote.value).toBe(-1);
-                    expect(vote.postId).toBe(this.post.id);
-                    expect(vote.userId).toBe(this.user.id);
-                    done();
-                })
-                .catch((err) => {
-                    console.log(err);
-                    done();
-                });
+            User.create({
+                email: "dave@example.com",
+                password: "PASSWORD"
+            })
+            .then((user) => {
+                this.user = user;
+                Vote.create({
+                        value: -1,
+                        postId: this.post.id,
+                        userId: this.user.id
+                    })
+                    .then((vote) => {
+                        expect(vote.value).toBe(-1);
+                        expect(vote.postId).toBe(this.post.id);
+                        expect(vote.userId).toBe(this.user.id);
+                        done();
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        done();
+                    });
+            });
+            
         });
 
         it("should not create a vote without assigned post or user", (done) => {
@@ -117,40 +126,42 @@ describe("Vote", () => {
 
     describe("#setUser()", () => {
         it("should associate a vote and user together", (done) => {
-            Vote.create({
-                    value: -1,
-                    postId: this.post.id,
-                    userId: this.user.id
-                })
-                .then((vote) => {
-                    this.vote = vote;
-                    expect(vote.userId).toBe(this.user.id);
+            Vote.findOne({
+                where: {
+                    userId: this.user.id,
+                    postId: this.post.id
+                }
+            })
+            .then((vote) => {
+                this.vote = vote;
+                expect(vote.userId).toBe(this.user.id);
 
-                    User.create({
-                            email: "bob@example.com",
-                            password: "password"
-                        })
-                        .then((newUser) => {
-                            this.vote.setUser(newUser)
-                                .then((vote) => {
-                                    expect(vote.userId).toBe(newUser.id);
-                                    done();
-                                });
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
-                });
+                User.create({
+                        email: "bob@example.com",
+                        password: "password"
+                    })
+                    .then((newUser) => {
+                        this.vote.setUser(newUser)
+                            .then((vote) => {
+                                expect(vote.userId).toBe(newUser.id);
+                                done();
+                            });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        done();
+                    });
+            });
         });
     });
 
     describe("#getUser()", () => {
         it("should return the associated User", (done) => {
-            Vote.create({
-                    value: 1,
-                    userId: this.user.id,
-                    postId: this.post.id
+            Vote.findOne({
+                    where: {
+                        userId: this.user.id,
+                        postId: this.post.id
+                    }
                 })
                 .then((vote) => {
                     vote.getUser()
@@ -168,41 +179,50 @@ describe("Vote", () => {
 
     describe("#setPost()", () => {
         it("should associate a post and a vote together", (done) => {
-            Vote.create({
-                    value: -1,
-                    postId: this.post.id,
-                    userId: this.user.id
+            Post.create({ // create a new post
+                title: "Dress code on Proxima b",
+                body: "Spacesuit, space helmet, space boots, and space gloves",
+                topicId: this.topic.id,
+                userId: this.user.id
+            })
+            .then((newPost) => {
+                User.create({
+                    email: "dave@example.com",
+                    password: "PASSWORD"
                 })
-                .then((vote) => {
-                    Post.create({ // create a new post
-                            title: "Dress code on Proxima b",
-                            body: "Spacesuit, space helmet, space boots, and space gloves",
-                            topicId: this.topic.id,
-                            userId: this.user.id
-                        })
-                        .then((newPost) => {
-                            expect(this.vote.postId).toBe(this.post.id);
+                .then((user) => {
+                    this.user = user;
+                    Vote.create({
+                        value: 1,
+                        postId: this.post.id,
+                        userId: this.user.id
+                    })
+                    .then((vote) => {
+                        expect(vote.postId).toBe(this.post.id);
 
-                            this.vote.setPost(newPost)
-                                .then((vote) => {
-                                    expect(vote.postId).toBe(newPost.id);
-                                    done();
-                                });
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            done();
-                        });
+                        vote.setPost(newPost)
+                            .then((updatedVote) => {
+                                expect(updatedVote.postId).toBe(newPost.id);
+                                done();
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                done();
+                            });
+                    });
                 });
+            });
         });
+        
     });
 
     describe("#getPost()", () => {
         it("should return the associated post", (done) => {
-            Vote.create({
-                    value: 1,
-                    userId: this.user.id,
-                    postId: this.post.id
+            Vote.findOne({
+                    where: {
+                        userId: this.user.id,
+                        postId: this.post.id
+                    }
                 })
                 .then((vote) => {
                     this.comment.getPost()

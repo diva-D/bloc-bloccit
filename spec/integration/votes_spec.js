@@ -69,32 +69,34 @@ describe("routes : votes", () => {
 
         describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
             it("should not create a new vote", (done) => {
-                const options = {
-                    url: `${base}${this.topic.id}/posts/${this.post.id}/votes/upvote`
-                };
-                request.get(options,
-                    (err, res, body) => {
-                        Vote.findOne({
-                                where: {
-                                    userId: this.user.id,
-                                    postId: this.post.id
-                                }
-                            })
-                            .then((vote) => {
-                                expect(vote).toBeNull();
-                                done();
-                            })
-                            .catch((err) => {
-                                console.log(err);
-                                done();
-                            });
-                    }
-                );
+                Vote.all()
+                .then((votes) => {
+                    const voteCountBeforeUpvote = votes.length;
+                    expect(votes.length).toBe(1);
+
+                    const options = {
+                        url: `${base}${this.topic.id}/posts/${this.post.id}/votes/upvote`
+                    };
+
+                    request.get(options, (err, res, body) => {
+                        Vote.all()
+                        .then((votes) => {
+                            expect(votes.length).toBe(voteCountBeforeUpvote);
+                            done();
+                        });
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    done();
+                });
             });
         });
+
     });
 
     describe("signed in user voting on a post", () => {
+        
         beforeEach((done) => {
             request.get({
                     url: "http://localhost:3000/auth/fake",
@@ -189,25 +191,18 @@ describe("routes : votes", () => {
 
             it("should not create more than one vote per user per post", (done) => {
                 Vote.create({
-                        value: 1,
-                        userId: this.user.id,
-                        postId: this.post.id
-                    })
-                    .then((vote) => {
-                        Vote.create({
-                                value: 1,
-                                userId: this.user.id,
-                                postId: this.post.id
-                            })
-                            .then((vote) => {
-                                // nothing as code should not run
-                                done();
-                            })
-                            .catch((err) => {
-                                expect(err.message).toContain("Validation error");
-                                done();
-                            });
-                    });
+                    value: 1,
+                    userId: this.user.id,
+                    postId: this.post.id
+                })
+                .then((vote) => {
+                    // nothing as code should not run given a vote is automatically added to each post
+                    done();
+                })
+                .catch((err) => {
+                    expect(err.message).toContain("Validation error");
+                    done();
+                });
             });
         });
 
